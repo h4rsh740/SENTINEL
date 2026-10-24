@@ -9,6 +9,8 @@
 
 SENTINEL is an open-source, deterministic firewall and policy enforcement engine for autonomous AI agents. It intercepts and evaluates agent tool calls (filesystem access, shell commands, network requests, cloud APIs) before they reach real tools, guaranteeing safe execution, tamper-evident receipts, and human-in-the-loop approvals.
 
+![SENTINEL Obsidian Cybernetic Command Console](console/public/stitch-ui.png)
+
 ---
 
 ## Key Features
@@ -16,9 +18,9 @@ SENTINEL is an open-source, deterministic firewall and policy enforcement engine
 - 🛡️ **Deterministic Policy Engine**: Pure, fail-safe evaluation logic. Zero LLM reliance for allow/deny decisions.
 - 🚫 **Guaranteed Non-Execution on Deny**: Wrapped tools are strictly unreachable unless an action passes explicit policy evaluation.
 - 🔗 **Tamper-Evident Decision Receipts**: Canonical JSON serialization (RFC-8785) with SHA-256 hash chaining records every decision immutably.
-- 🧪 **SENTINEL Attack Lab**: 10+ reproducible, harmless attack simulation scenarios (credential exfiltration, path traversal, `rm -rf /` pipe attacks, network exfiltration, wrapper bypass).
+- 🧪 **SENTINEL Attack Lab**: 13 reproducible, harmless attack simulation scenarios (credential exfiltration, path traversal, `rm -rf /` pipe attacks, network exfiltration, wrapper bypass).
 - ⚡ **Developer-Friendly CLI**: `sentinel init`, `validate`, `test`, `simulate`, `explain`, and `report`.
-- 🖥️ **Web Console**: Premium Next.js web application featuring a Policy Studio, Live Decision Explorer, and Attack Lab Simulator.
+- 🖥️ **Web Console**: Premium Next.js web application designed with Google Stitch (`Obsidian Cybernetic Vigilance`), featuring a Policy Studio, Live Decision Explorer, and Attack Lab Simulator.
 - 🇮🇳 **BharatCode Advisory Integration**: Uses BharatCode (`qwen-3.8-27b`) to draft policies from natural language with schema validation and test enforcement.
 
 ---
@@ -29,8 +31,8 @@ SENTINEL is an open-source, deterministic firewall and policy enforcement engine
 
 ```bash
 # Clone the repository
-git clone https://github.com/bharatcode/sentinel.git
-cd sentinel
+git clone https://github.com/h4rsh740/SENTINEL.git
+cd SENTINEL
 
 # Set up virtual environment
 python3 -m venv .venv
