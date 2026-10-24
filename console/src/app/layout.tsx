@@ -35,7 +35,7 @@ export default function RootLayout({
               <span>Official Model: BharatCode Qwen 3.8-27b</span>
               <span>•</span>
               <a
-                href="https://github.com/bharatcode/sentinel"
+                href="https://github.com/h4rsh740/SENTINEL"
                 target="_blank"
                 rel="noreferrer"
                 className="text-cyan-400 hover:underline"
