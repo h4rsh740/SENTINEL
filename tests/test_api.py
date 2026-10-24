@@ -1,9 +1,22 @@
 """API Integration Tests using FastAPI TestClient."""
 
+import pytest
 from fastapi.testclient import TestClient
 from sentinel.api.main import app
+from sentinel import Sentinel, SentinelStore
 
 client = TestClient(app)
+
+
+@pytest.fixture(autouse=True, scope="module")
+def setup_test_db(tmp_path_factory):
+    tmp_dir = tmp_path_factory.mktemp("api_test_db")
+    test_db = str(tmp_dir / "test_sentinel_audit.db")
+    store = SentinelStore(test_db)
+    firewall = Sentinel.from_file("policies/default-firewall.yaml", db_path=test_db)
+    import sentinel.api.routes as routes
+    routes._store = store
+    routes._firewall = firewall
 
 
 def test_health_endpoint():
