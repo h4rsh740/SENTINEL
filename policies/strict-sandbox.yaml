@@ -1,0 +1,70 @@
+policy_id: "strict-sandbox-v1"
+name: "SENTINEL Zero-Trust Agent Sandbox"
+version: "1.0.0"
+mode: "strict"
+allowed_workspace_root: "."
+
+rules:
+  - id: "zero-trust-deny-shell"
+    name: "Block All Shell Executions"
+    description: "In zero-trust sandbox mode, autonomous shell execution is prohibited"
+    decision: "DENY"
+    priority: 1000
+    severity: "CRITICAL"
+    conditions:
+      tool_match: ["shell", "bash", "exec", "terminal"]
+    test_cases:
+      - input:
+          tool: "shell"
+          operation: "execute"
+          resource: "ls -la"
+        expected: "DENY"
+
+  - id: "zero-trust-deny-network"
+    name: "Block External Network Access"
+    description: "External network sockets are disabled to prevent data exfiltration"
+    decision: "DENY"
+    priority: 950
+    severity: "CRITICAL"
+    conditions:
+      tool_match: ["network", "http", "curl", "fetch"]
+    test_cases:
+      - input:
+          tool: "network"
+          operation: "request"
+          resource: "https://google.com"
+        expected: "DENY"
+
+  - id: "allow-readonly-workspace"
+    name: "Permit Read-Only Workspace Inspection"
+    description: "Agent may only read or list files inside the declared workspace"
+    decision: "ALLOW"
+    priority: 500
+    severity: "LOW"
+    conditions:
+      tool_match: "filesystem"
+      operation_match: ["read", "list", "stat"]
+      path_must_be_under: "."
+    test_cases:
+      - input:
+          tool: "filesystem"
+          operation: "read"
+          resource: "README.md"
+        expected: "ALLOW"
+
+  - id: "approve-file-writes"
+    name: "Require Operator Approval for File Modifications"
+    description: "Any file write requires human confirmation"
+    decision: "REQUIRE_APPROVAL"
+    priority: 600
+    severity: "MEDIUM"
+    conditions:
+      tool_match: "filesystem"
+      operation_match: ["write", "delete", "create"]
+    test_cases:
+      - input:
+          tool: "filesystem"
+          operation: "write"
+          resource: "workspace/output.txt"
+        expected: "REQUIRE_APPROVAL"
+

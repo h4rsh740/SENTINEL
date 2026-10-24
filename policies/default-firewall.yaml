@@ -1,0 +1,126 @@
+policy_id: "default-firewall-v1"
+name: "SENTINEL Standard Developer & Agent Policy"
+version: "1.0.0"
+mode: "strict"
+allowed_workspace_root: "."
+
+rules:
+  - id: "deny-sensitive-env"
+    name: "Block Sensitive Environment & Credential Access"
+    description: "Blocks attempts to read or write .env, private keys, or credentials"
+    decision: "DENY"
+    priority: 950
+    severity: "CRITICAL"
+    conditions:
+      tool_match: "filesystem"
+      path_must_not_match:
+        - "*.env"
+        - "*.env.*"
+        - "*id_rsa*"
+        - "*id_ed25519*"
+        - "*.pem"
+        - "*credentials.json"
+    test_cases:
+      - input:
+          tool: "filesystem"
+          operation: "read"
+          resource: ".env"
+        expected: "DENY"
+      - input:
+          tool: "filesystem"
+          operation: "read"
+          resource: "src/main.py"
+        expected: "ALLOW"
+
+  - id: "deny-destructive-shell"
+    name: "Block Destructive Shell Invocations"
+    description: "Prohibits dangerous commands like root deletion, formatting disks, and fork bombs"
+    decision: "DENY"
+    priority: 900
+    severity: "CRITICAL"
+    conditions:
+      tool_match: ["shell", "bash", "exec"]
+      forbidden_tokens:
+        - "rm -rf /"
+        - "rm -rf ~"
+        - "mkfs"
+        - "dd if="
+        - ":(){:|:&};:"
+        - "chmod 777 /"
+        - "| sh"
+        - "| bash"
+    test_cases:
+      - input:
+          tool: "shell"
+          operation: "execute"
+          resource: "rm -rf /"
+        expected: "DENY"
+      - input:
+          tool: "shell"
+          operation: "execute"
+          resource: "pytest tests/"
+        expected: "ALLOW"
+
+  - id: "approve-sensitive-deploy"
+    name: "Require Approval for Production Deployment"
+    description: "Sensitive infrastructure deployment requires verified human confirmation"
+    decision: "REQUIRE_APPROVAL"
+    priority: 800
+    severity: "HIGH"
+    conditions:
+      tool_match: ["shell", "cloud", "api"]
+      resource_pattern: "(deploy.*prod|terraform\\s+apply|kubectl\\s+delete)"
+    test_cases:
+      - input:
+          tool: "shell"
+          operation: "execute"
+          resource: "deploy-to-prod.sh"
+        expected: "REQUIRE_APPROVAL"
+
+  - id: "allow-safe-dev-shell"
+    name: "Permit Standard Development Shell Commands"
+    description: "Allows non-destructive dev commands: git, pytest, npm, cargo"
+    decision: "ALLOW"
+    priority: 500
+    severity: "INFO"
+    conditions:
+      tool_match: ["shell", "bash", "exec"]
+      resource_pattern: "^(git|npm|yarn|pnpm|cargo|pytest|python3?|ruff|pip|uv)\\b.*"
+
+  - id: "allow-workspace-files"
+    name: "Allow Workspace File Access"
+    description: "Permits reading and writing files within the project workspace"
+    decision: "ALLOW"
+    priority: 400
+    severity: "INFO"
+    conditions:
+      tool_match: "filesystem"
+      operation_match: ["read", "write", "list", "stat"]
+      path_must_be_under: "."
+
+  - id: "allow-curated-network"
+    name: "Allow Safe Outbound Package Registries & GitHub"
+    description: "Permits outbound HTTP requests only to vetted registries and APIs"
+    decision: "ALLOW"
+    priority: 300
+    severity: "LOW"
+    conditions:
+      tool_match: ["network", "http", "curl", "fetch"]
+      allowed_domains:
+        - "github.com"
+        - "api.github.com"
+        - "pypi.org"
+        - "files.pythonhosted.org"
+        - "registry.npmjs.org"
+        - "bharatcode.ai"
+    test_cases:
+      - input:
+          tool: "network"
+          operation: "request"
+          resource: "https://pypi.org/pypi/requests/json"
+        expected: "ALLOW"
+      - input:
+          tool: "network"
+          operation: "request"
+          resource: "http://malicious-exfiltration.evil.com/leak"
+        expected: "DENY"

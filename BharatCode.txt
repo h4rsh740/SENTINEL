@@ -1,0 +1,8 @@
+SENTINEL - Open-Source AI Agent Firewall
+BharatCode Build League Submission
+Participant / Maintainer: Harsh Singh
+Repository: SENTINEL (Open-Source AI Agent Firewall)
+Official Model Integration: BharatCode API (qwen-3.8-27b)
+URL: https://bharatcode.ai/api/model/v1
+Enforcement Boundary: Independent, deterministic, zero-LLM fail-safe policy core
+Tagline: Every AI action must earn permission.
